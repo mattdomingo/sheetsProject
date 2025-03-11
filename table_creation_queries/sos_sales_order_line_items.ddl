@@ -1,4 +1,4 @@
-CREATE TABLE `sheets_base_schema.sales_order_line_item` (
+CREATE TABLE `sheets_base_schema.sos_sales_order_line_item` (
   `id` STRING OPTIONS(description = 'this is a unique identifier of the individual line item in SOS'),
   `order_id` STRING OPTIONS(description = 'this is a unique identifier for the overal order of which this row is a sub-component of. This ties to the parent order via this key'),
   `amount` FLOAT64 OPTIONS (description = 'this is the total USD value of the product on this line item and in the parent order'),
@@ -6,7 +6,7 @@ CREATE TABLE `sheets_base_schema.sales_order_line_item` (
   `due_date` TIMESTAMP OPTIONS (description = 'this is the date of which the parent order is due by to the purchaser. At times, the line items will have different due dates than the parent order, but this is only caused by delays in product availability'),
   `invoiced` INT64 OPTIONS (description = 'this is the number of units of the SKU / item that were invoiced to the customer'),
   `quantity` INT64 OPTIONS (description = 'this is the number of units of the SKU / item that were requested by the customer'),
-  `unitprice` INT64 OPTIONS (description = 'this is the price per unit of the SKU / item that was quoted to the customer'),
+  `unitprice` FLOAT64 OPTIONS (description = 'this is the price per unit of the SKU / item that was quoted to the customer'),
   `item_id` STRING OPTIONS (description = 'this is the unique identifier of the product / item that is on the line_item'),
   `item_name` STRING OPTIONS (description = 'this is the name  of the product / item that is on the line_item, it will often match the description field')
   
