@@ -1,0 +1,17 @@
+TRUNCATE TABLE `sheets_base_schema.account`;
+
+INSERT INTO `sheets_base_schema.account` (
+  id,
+  active,
+  company_name,
+  display_name,
+  email
+)
+SELECT
+  id,
+  active,
+  company_name,
+  display_name,
+  email
+FROM
+  `quickbooks.vendor`;
