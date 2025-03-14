@@ -1,0 +1,194 @@
+#account
+[
+  {
+    "tableName": "sheets_base_schema.qbo_account",
+    "description": "This table contains account information from QuickBooks.",
+    "columns": [
+      {
+        "name": "id",
+        "type": "STRING",
+        "description": "Unique identifier for the account."
+      },
+      {
+        "name": "active",
+        "type": "BOOLEAN",
+        "description": "Indicates whether the account is currently active."
+      },
+      {
+        "name": "company_name",
+        "type": "STRING",
+        "description": "Name of the company associated with the account."
+      },
+      {
+        "name": "display_name",
+        "type": "STRING",
+        "description": "Display name of the account."
+      },
+      {
+        "name": "email",
+        "type": "STRING",
+        "description": "Email associated with the account."
+      }
+    ]
+  }
+]
+
+#general ledger
+[
+  {
+    "tableName": "sheets_base_schema.qbo_general_ledger",
+    "description": "This table stores the general ledger transaction records, including account details, transaction amounts, and financial statement classifications.",
+    "columns": [
+      {
+        "name": "unique_id",
+        "type": "STRING",
+        "description": "Unique identifier of the general ledger line, dependent on transaction_id, transaction_index, account_id, transaction_type, transaction_source, and source_relation."
+      },
+      {
+        "name": "transaction_id",
+        "type": "STRING",
+        "description": "Unique identifier of the transaction. Each transaction will have an offsetting debit and credit record."
+      },
+      {
+        "name": "source_relation",
+        "type": "STRING",
+        "description": "The source of the record if the unioning functionality is being used. If not, this field will be null."
+      },
+      {
+        "name": "transaction_index",
+        "type": "INT64",
+        "description": "Unique identifier of the individual debit and credit records of the transaction."
+      },
+      {
+        "name": "transaction_date",
+        "type": "DATE",
+        "description": "The date that the transaction occurred."
+      },
+      {
+        "name": "customer_id",
+        "type": "STRING",
+        "description": "Reference to the customer associated with the transaction."
+      },
+      {
+        "name": "vendor_id",
+        "type": "STRING",
+        "description": "Reference to the vendor associated with the transaction."
+      },
+      {
+        "name": "amount",
+        "type": "INT64",
+        "description": "Monetary amount of the transaction line."
+      },
+      {
+        "name": "account_id",
+        "type": "STRING",
+        "description": "The identifier of the account associated with the transaction line."
+      },
+      {
+        "name": "class_id",
+        "type": "STRING",
+        "description": "Reference to the class associated with the transaction line."
+      },
+      {
+        "name": "department_id",
+        "type": "STRING",
+        "description": "Reference to the department with the transaction line."
+      },
+      {
+        "name": "account_number",
+        "type": "STRING",
+        "description": "User-defined number of the account."
+      },
+      {
+        "name": "account_name",
+        "type": "STRING",
+        "description": "Name of the account associated with the transaction line."
+      },
+      {
+        "name": "is_sub_account",
+        "type": "BOOL",
+        "description": "Boolean indicating whether the account is a sub-account (true) or a parent account (false)."
+      },
+      {
+        "name": "parent_account_number",
+        "type": "STRING",
+        "description": "The parent account number. If the account is the parent account, then the account number is recorded."
+      },
+      {
+        "name": "parent_account_name",
+        "type": "STRING",
+        "description": "The parent account name. If the account is the parent account, then the account name is recorded."
+      },
+      {
+        "name": "account_type",
+        "type": "STRING",
+        "description": "The type of account associated with the transaction line."
+      },
+      {
+        "name": "account_sub_type",
+        "type": "STRING",
+        "description": "Sub-type of the account associated with the transaction line."
+      },
+      {
+        "name": "financial_statement_helper",
+        "type": "STRING",
+        "description": "Either \"balance sheet\" or \"income statement\" and is used to determine which financial statement the account impacts."
+      },
+      {
+        "name": "account_current_balance",
+        "type": "INT64",
+        "description": "Total current balance of the account associated with the transaction line."
+      },
+      {
+        "name": "account_class",
+        "type": "STRING",
+        "description": "Class of the account associated with the transaction line. Will be one of \"Expense\", \"Revenue\", \"Asset\", \"Liability\", or \"Equity\"."
+      },
+      {
+        "name": "transaction_type",
+        "type": "STRING",
+        "description": "Identifier of whether the transaction is a debit or credit entry."
+      },
+      {
+        "name": "transaction_source",
+        "type": "STRING",
+        "description": "Field signifying the source of the transaction (e.g., Bill, Invoice, Deposit, Journal Entry, etc.)."
+      },
+      {
+        "name": "account_transaction_type",
+        "type": "STRING",
+        "description": "Identifier of whether the account is increased by either a debit or credit entry."
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "description": "Time at which the transaction was created."
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP",
+        "description": "Time at which the transaction was last updated."
+      },
+      {
+        "name": "adjusted_amount",
+        "type": "INT64",
+        "description": "The amount that impacts the account. If transaction_type = account_transaction_type, then the impact increases, otherwise, it decreases the account."
+      },
+      {
+        "name": "adjusted_converted_amount",
+        "type": "INT64",
+        "description": "The amount, converted with exchange rates applied if available, that impacts the account. If transaction_type = account_transaction_type, then the impact increases, otherwise, it decreases the account."
+      },
+      {
+        "name": "running_balance",
+        "type": "INT64",
+        "description": "The running balance of the account by each individual day."
+      },
+      {
+        "name": "running_converted_balance",
+        "type": "INT64",
+        "description": "The running balance of the account by each individual day, converted with exchange rates applied if available."
+      }
+    ]
+  }
+]
