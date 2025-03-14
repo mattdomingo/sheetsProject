@@ -1,6 +1,6 @@
-TRUNCATE TABLE `sheets_base_schema.qbo_account`;
+TRUNCATE TABLE `sheets_base_schema.qbo_vendor`;
 
-INSERT INTO `sheets_base_schema.qbo_account` (
+INSERT INTO `sheets_base_schema.qbo_vendor` (
   id,
   active,
   company_name,
