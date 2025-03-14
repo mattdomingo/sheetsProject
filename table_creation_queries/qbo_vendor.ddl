@@ -1,4 +1,4 @@
-CREATE TABLE `sheets_base_schema.qbo_account` (
+CREATE TABLE `sheets_base_schema.qbo_vendor` (
     `id` STRING OPTIONS(description = 'Unique identifier for the account.'),
     `active` BOOLEAN OPTIONS(description = 'Indicates whether the account is currently active.'),
     `company_name` STRING OPTIONS(description = 'Name of the company associated with the account.'),
