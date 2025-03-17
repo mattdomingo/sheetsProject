@@ -1,7 +1,7 @@
 CREATE TABLE `sheets_base_schema.qbo_customer` (
   `id` STRING OPTIONS(description = 'Unique identifier for the customer.'),
   `active` BOOLEAN OPTIONS(description = 'Indicates whether the customer is currently active.'),
-  `balance` STRING OPTIONS(description = 'Balance for the customer.'),
+  `balance` FLOAT64 OPTIONS(description = 'Balance for the customer.'),
   `company_name` STRING OPTIONS(description = 'Name of the company associated with the customer.'),
   `display_name` STRING OPTIONS(description = 'Display name of the customer.'),
   `email` STRING OPTIONS(description = 'Email associated with the customer.'),
