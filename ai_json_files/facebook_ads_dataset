@@ -1,0 +1,87 @@
+{
+  "table_name": "facebook_ads_ad_report",
+  "dataset": "sheets_base_schema",
+  "description": "Contains daily ad performance metrics from Facebook Ads.",
+  "columns": [
+    {
+      "name": "source_relation",
+      "type": "STRING",
+      "description": "The source of the record if the unioning functionality is being used. If not this field will be empty."
+    },
+    {
+      "name": "date_day",
+      "type": "DATE",
+      "description": "The date of the performance."
+    },
+    {
+      "name": "account_id",
+      "type": "INT64",
+      "description": "The ID of the related account."
+    },
+    {
+      "name": "account_name",
+      "type": "STRING",
+      "description": "The name of the related account."
+    },
+    {
+      "name": "campaign_id",
+      "type": "INT64",
+      "description": "The ID of the related campaign."
+    },
+    {
+      "name": "campaign_name",
+      "type": "STRING",
+      "description": "The name of the related campaign."
+    },
+    {
+      "name": "ad_set_id",
+      "type": "INT64",
+      "description": "The ID of the related ad set."
+    },
+    {
+      "name": "ad_set_name",
+      "type": "STRING",
+      "description": "The name of the related ad set."
+    },
+    {
+      "name": "ad_id",
+      "type": "INT64",
+      "description": "The ID of the related ad."
+    },
+    {
+      "name": "ad_name",
+      "type": "STRING",
+      "description": "The name of the related ad."
+    },
+    {
+      "name": "conversion_domain",
+      "type": "STRING",
+      "description": "The domain you've configured the ad to convert to."
+    },
+    {
+      "name": "clicks",
+      "type": "INT64",
+      "description": "The number of clicks the ad had on the given day."
+    },
+    {
+      "name": "impressions",
+      "type": "INT64",
+      "description": "The number of impressions the ad had on the given day."
+    },
+    {
+      "name": "spend",
+      "type": "FLOAT64",
+      "description": "The spend on the ad in the given day."
+    },
+    {
+      "name": "conversions",
+      "type": "FLOAT64",
+      "description": "Total number of conversions using the default attribution window on the given day."
+    },
+    {
+      "name": "conversions_value",
+      "type": "FLOAT64",
+      "description": "Total monetary of conversions using the default attribution window on the given day."
+    }
+  ]
+}
