@@ -1,0 +1,49 @@
+TRUNCATE TABLE `sheets_base_schema.qbo_cash_flow_statement`;
+
+INSERT INTO `sheets_base_schema.qbo_cash_flow_statement` (
+  `cash_flow_period`,
+  `source_relation`,
+  `account_class`,
+  `class_id`,
+  `is_sub_account`,
+  `parent_account_number`,
+  `parent_account_name`,
+  `account_type`,
+  `account_sub_type`,
+  `account_number`,
+  `account_id`,
+  `account_name`,
+  `cash_ending_period`,
+  `cash_converted_ending_period`,
+  `account_unique_id`,
+  `cash_flow_type`,
+  `cash_flow_ordinal`,
+  `cash_beginning_period`,
+  `cash_net_period`,
+  `cash_converted_beginning_period`,
+  `cash_converted_net_period`
+)
+SELECT
+  `cash_flow_period`,
+  `source_relation`,
+  `account_class`,
+  `class_id`,
+  `is_sub_account`,
+  `parent_account_number`,
+  `parent_account_name`,
+  `account_type`,
+  `account_sub_type`,
+  `account_number`,
+  `account_id`,
+  `account_name`,
+  `cash_ending_period`,
+  `cash_converted_ending_period`,
+  `account_unique_id`,
+  `cash_flow_type`,
+  `cash_flow_ordinal`,
+  `cash_beginning_period`,
+  `cash_net_period`,
+  `cash_converted_beginning_period`,
+  `cash_converted_net_period`
+FROM
+  `quickbooks_quickbooks.quickbooks__cash_flow_statement`;

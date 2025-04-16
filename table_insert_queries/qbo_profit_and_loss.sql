@@ -1,0 +1,41 @@
+TRUNCATE TABLE `sheets_base_schema.qbo_profit_and_loss`;
+
+INSERT INTO `sheets_base_schema.qbo_profit_and_loss` (
+  `calendar_date`,
+  `period_first_day`,
+  `period_last_day`,
+  `source_relation`,
+  `account_class`,
+  `class_id`,
+  `is_sub_account`,
+  `parent_account_number`,
+  `parent_account_name`,
+  `account_type`,
+  `account_sub_type`,
+  `account_number`,
+  `account_id`,
+  `account_name`,
+  `amount`,
+  `converted_amount`,
+  `account_ordinal`
+)
+SELECT
+  `calendar_date`,
+  `period_first_day`,
+  `period_last_day`,
+  `source_relation`,
+  `account_class`,
+  `class_id`,
+  `is_sub_account`,
+  `parent_account_number`,
+  `parent_account_name`,
+  `account_type`,
+  `account_sub_type`,
+  `account_number`,
+  `account_id`,
+  `account_name`,
+  `amount`,
+  `converted_amount`,
+  `account_ordinal`
+FROM
+  `quickbooks_quickbooks.quickbooks__profit_and_loss`; -- <-- VERIFY THIS SOURCE TABLE NAME 

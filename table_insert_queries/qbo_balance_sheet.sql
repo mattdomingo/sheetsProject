@@ -1,0 +1,41 @@
+TRUNCATE TABLE `sheets_base_schema.qbo_balance_sheet`;
+
+INSERT INTO `sheets_base_schema.qbo_balance_sheet` (
+  `calendar_date`,
+  `period_first_day`,
+  `period_last_day`,
+  `account_class`,
+  `is_sub_account`,
+  `parent_account_number`,
+  `parent_account_name`,
+  `class_id`,
+  `account_type`,
+  `account_sub_type`,
+  `account_number`,
+  `account_name`,
+  `account_id`,
+  `source_relation`,
+  `amount`,
+  `converted_amount`,
+  `account_ordinal`
+)
+SELECT
+  `calendar_date`,
+  `period_first_day`,
+  `period_last_day`,
+  `account_class`,
+  `is_sub_account`,
+  `parent_account_number`,
+  `parent_account_name`,
+  `class_id`,
+  `account_type`,
+  `account_sub_type`,
+  `account_number`,
+  `account_name`,
+  `account_id`,
+  `source_relation`,
+  `amount`,
+  `converted_amount`,
+  `account_ordinal`
+FROM
+  `quickbooks_quickbooks.quickbooks__balance_sheet`;
