@@ -1,0 +1,31 @@
+-- Creates the target table for QuickBooks Expenses Sales Enhanced with column descriptions
+CREATE OR REPLACE TABLE `sheets_base_schema.qbo_expenses_sales_enhanced` (
+  `transaction_source` STRING OPTIONS(description = 'Set to expense if the transaction type is an expense and sale if the transaction type is a sale.'),
+  `transaction_id` STRING OPTIONS(description = 'Unique identifier of the transaction for either the expense or sale.'),
+  `source_relation` STRING OPTIONS(description = 'The source of the record if the unioning functionality is being used. If not this field will be null.'),
+  `transaction_line_id` INT64 OPTIONS(description = 'Unique identifier of either the expense or sale line item.'),
+  `doc_number` STRING OPTIONS(description = 'The QuickBooks document number reference.'),
+  `transaction_type` STRING OPTIONS(description = 'Specifies the expense or sale transaction type (ie. invoice, sales_receipt, deposit, journal entry, etc.).'),
+  `transaction_date` DATE OPTIONS(description = 'The date that the transaction occurred.'),
+  `item_id` STRING OPTIONS(description = 'Unique identifier of the item included in a sale transaction.'),
+  `item_quantity` FLOAT64 OPTIONS(description = 'Quantity of items included in the sale transaction.'),
+  `item_unit_price` FLOAT64 OPTIONS(description = 'Unit price of the item included in the sale transaction.'),
+  `account_id` STRING OPTIONS(description = 'The identifier of the account associated with either the expense or sale.'),
+  `account_name` STRING OPTIONS(description = 'Name of the account associated with either the expense or sale.'),
+  `account_sub_type` STRING OPTIONS(description = 'Sub type of the account associated with either the expense or sale.'),
+  `class_id` STRING OPTIONS(description = 'Reference to the class associated with either the expense or sale.'),
+  `department_id` STRING OPTIONS(description = 'Reference to the department associated with either the expense or sale.'),
+  `department_name` STRING OPTIONS(description = 'Name of the department associated with either the expense or sale.'),
+  `customer_id` STRING OPTIONS(description = 'Reference to the customer associated with either the expense or sale.'),
+  `customer_name` STRING OPTIONS(description = 'Name of the customer associated with either the expense or sale.'),
+  `customer_website` STRING OPTIONS(description = 'The website url of the customer.'),
+  `vendor_id` STRING OPTIONS(description = 'Reference to the vendor associated with either the expense or sale.'),
+  `vendor_name` STRING OPTIONS(description = 'Name of the vendor associated with either the expense or sale.'),
+  `billable_status` STRING OPTIONS(description = 'Status indicating whether the expense or sale is billable.'),
+  `description` STRING OPTIONS(description = 'Description given to either the expense or sale transaction.'),
+  `amount` FLOAT64 OPTIONS(description = 'Monetary amount of either the expense or sale line item.'),
+  `converted_amount` FLOAT64 OPTIONS(description = 'Monetary amount, converted with exchange rates applied if available, of either the expense or sale line item.'),
+  `total_amount` BIGNUMERIC OPTIONS(description = 'Total monetary amount of either the expense or sale.'),
+  `total_converted_amount` BIGNUMERIC OPTIONS(description = 'Total monetary amount, converted with exchange rates applied if available, of either the expense or sale.')
+)
+OPTIONS (description = 'Contains all expense and sale transactions with enhanced information about accounts, departments, customers, and vendors. This table can be used for detailed expense and revenue analysis.'); 
