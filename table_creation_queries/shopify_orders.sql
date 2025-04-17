@@ -1,4 +1,4 @@
-CREATE TABLE `sheets_base_schema.shopify_orders` (
+CREATE OR REPLACE TABLE `sheets_base_schema.shopify_orders` (
   `order_id` INT64 OPTIONS(description = 'The ID of the order, used for API purposes. This is different from the order_number property, which is the ID used by the shop owner and customer.'),
   `user_id` INT64 OPTIONS(description = 'The ID of the user logged into Shopify POS who processed the order, if applicable.'),
   `total_discounts` FLOAT64 OPTIONS(description = 'The total discounts applied to the price of the order in the shop currency.'),
