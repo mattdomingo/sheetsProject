@@ -61,5 +61,4 @@ CREATE OR REPLACE TABLE `sheets_base_schema.shopify_order_lines` (
   `variant_sellable_online_quantity` INT64 OPTIONS(description = 'The total sellable quantity of the variant for online channels.'),
   `order_line_tax` FLOAT64 OPTIONS(description = 'Total taxes for the line item.')
 )
-OPTIONS (description = 'Contains processed order line item data from Shopify. Please update this description.'); -- TODO: Update table description
-
+OPTIONS (description = 'Contains processed order line item data from Shopify.');
