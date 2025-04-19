@@ -1,3 +1,0 @@
-commented out unused connections in the insert queries, left them in for creation queries
-weird syntax with the insert query select function using conversions_value while everywhere else uses conversion_value
-pass 2 standardized it all to converstions_value
