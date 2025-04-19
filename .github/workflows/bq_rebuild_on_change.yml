@@ -1,0 +1,200 @@
+name: Rebuild Changed BQ Tables and Copy to GCS
+
+on:
+  push:
+    branches:
+      - main # Trigger on push/merge to main branch
+    paths:
+      # Only trigger if relevant CREATE SQL files change
+      - 'table_create_queries/**.sql'
+
+permissions:
+  contents: read # Required to checkout the code
+  # id-token: write # Required for Workload Identity Federation (preferred method)
+  # If using SA Key JSON instead of WIF:
+  # (No specific permissions needed here, but ensure secret is configured)
+
+jobs:
+  rebuild-and-copy-sql:
+    runs-on: ubuntu-latest
+    # Optional: Specify environment if using Workload Identity Federation
+    # environment: your-gcp-environment-name
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch entire history to compare changes accurately against the previous commit
+          fetch-depth: 0
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          # Option 1: Workload Identity Federation (Recommended)
+          # workload_identity_provider: 'projects/<YOUR_PROJECT_NUMBER>/locations/global/workloadIdentityPools/<YOUR_POOL_ID>/providers/<YOUR_PROVIDER_ID>'
+          # service_account: 'your-bq-gcs-service-account@your-gcp-project-id.iam.gserviceaccount.com' # Needs BQ and GCS permissions
+          # Option 2: Service Account Key JSON (Using your secret)
+          credentials_json: '${{ secrets.SA_DEPLOYMENT }}' # Ensure this SA has BQ and GCS permissions
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install google-cloud-bigquery
+
+      - name: Identify and execute changed SQL pairs (Create then Insert)
+        id: execute
+        run: |
+          echo "Identifying changed SQL files in table_create_queries/ ..."
+          CHANGED_CREATE_FILES=$(git diff --name-only --diff-filter=ACMRTUXB HEAD~1 HEAD -- 'table_create_queries/**.sql' || true)
+
+          if [[ -z "$CHANGED_CREATE_FILES" ]]; then
+            echo "No changed *.sql files found in table_create_queries/. Skipping."
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Found changed create files to process:"
+          echo "$CHANGED_CREATE_FILES"
+          echo "-------------------------------------"
+
+          # Define the inline Python executor script (same as the other workflow)
+          PYTHON_EXEC_SCRIPT=$(cat << 'EOF'
+          import sys, os, logging
+          from google.cloud import bigquery
+          from google.cloud.exceptions import GoogleCloudError
+          logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+          def execute_sql(client, sql_content, source_file):
+              logging.info(f"Executing SQL from {source_file}...")
+              statements = [stmt.strip() for stmt in sql_content.split(';') if stmt.strip() and not stmt.strip().startswith('--')]
+              job = None
+              try:
+                  for statement in statements:
+                      if not statement: continue
+                      logging.info(f"Running: {statement[:150]}...")
+                      job = client.query(statement)
+                      job.result() # Wait for completion
+                      logging.info(f"Successfully executed statement from {source_file}.")
+                  return True
+              except GoogleCloudError as e:
+                  logging.error(f"BigQuery error executing SQL from {source_file}: {e}")
+                  if job and job.errors:
+                       for error in job.errors: logging.error(f"  BQ Error Detail: {error['message']}")
+                  return False
+              except Exception as e:
+                  logging.error(f"Unexpected error executing SQL from {source_file}: {e}")
+                  return False
+
+          if __name__ == "__main__":
+              sql_files_to_execute = sys.argv[1:]
+              if not sql_files_to_execute:
+                  logging.warning("No SQL files provided to execute script.")
+                  sys.exit(0)
+              bq_client = bigquery.Client()
+              logging.info(f"Using BigQuery Client with project: {bq_client.project}")
+              all_successful = True
+              for file_path in sql_files_to_execute:
+                  logging.info(f"--- Processing file: {file_path} ---")
+                  try:
+                      with open(file_path, 'r') as f: content = f.read()
+                      if not execute_sql(bq_client, content, file_path): all_successful = False
+                  except FileNotFoundError:
+                      logging.error(f"File not found: {file_path}")
+                      all_successful = False
+                  except Exception as e:
+                      logging.error(f"Failed to read or process file {file_path}: {e}")
+                      all_successful = False
+              if not all_successful: sys.exit(1) # Fail the step
+              logging.info("SQL file executed successfully.")
+              sys.exit(0) # Succeed the step
+          EOF
+          )
+
+          OVERALL_SUCCESS=true
+          FILES_TO_COPY="" # Store paths of files successfully processed in pairs
+
+          # Loop through changed CREATE files
+          while IFS= read -r create_file; do
+            if [[ -z "$create_file" ]]; then continue; fi
+            echo "" # Add spacing
+            echo "--- Processing pair starting with: $create_file ---"
+
+            table_name=$(basename "$create_file" .sql)
+            insert_file="table_insert_queries/${table_name}.sql"
+
+            if [[ ! -f "$insert_file" ]]; then
+              echo "ERROR: Corresponding insert file '$insert_file' not found for '$create_file'. Skipping pair."
+              OVERALL_SUCCESS=false # Mark failure but continue checking other files
+              continue
+            fi
+
+            PAIR_SUCCESS=true
+            # Execute CREATE file
+            echo "Executing CREATE file: $create_file"
+            # Use process substitution to pass file path to python script
+            if ! echo "$create_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
+              echo "ERROR: Failed to execute $create_file."
+              PAIR_SUCCESS=false
+              OVERALL_SUCCESS=false
+            fi
+
+            # Execute INSERT file only if CREATE was successful for this pair
+            if [[ "$PAIR_SUCCESS" == "true" ]]; then
+              echo "Executing INSERT file: $insert_file"
+              if ! echo "$insert_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
+                echo "ERROR: Failed to execute $insert_file."
+                PAIR_SUCCESS=false # Mark pair as failed
+                OVERALL_SUCCESS=false
+              fi
+            fi
+
+            # If both parts of the pair executed successfully, add them to the copy list
+            if [[ "$PAIR_SUCCESS" == "true" ]]; then
+              echo "Successfully processed pair: $create_file and $insert_file"
+              FILES_TO_COPY+="$create_file"$'\n'
+              FILES_TO_COPY+="$insert_file"$'\n'
+            fi
+
+          done <<< "$CHANGED_CREATE_FILES"
+
+          # Check overall success and output files for copying
+          if [[ "$OVERALL_SUCCESS" == "true" ]]; then
+            echo "-------------------------------------"
+            echo "All changed SQL pairs executed successfully."
+            echo "processed_files_for_copy<<EOF" >> $GITHUB_OUTPUT
+            echo -n "$FILES_TO_COPY" >> $GITHUB_OUTPUT # Use -n to avoid extra newline
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "status=executed" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "-------------------------------------"
+            echo "One or more SQL execution steps failed."
+            echo "status=failed" >> $GITHUB_OUTPUT
+            # Do not output files for copying if any step failed
+            exit 1
+          fi
+
+      - name: Copy processed files to GCS
+        # Run only if the previous step succeeded overall
+        if: success() && steps.execute.outputs.status == 'executed'
+        run: |
+          GCS_BUCKET="testmain-tenant-dev-sql-storage" # Target bucket
+          echo "Copying successfully processed files to gs://${GCS_BUCKET}/ ..."
+          echo "Files to copy:"
+          echo "${{ steps.execute.outputs.processed_files_for_copy }}"
+          echo "-------------------------------------"
+          # Use process substitution to loop through multi-line output
+          while IFS= read -r file_path; do
+            if [[ -n "$file_path" ]]; then # Ensure the line is not empty
+              echo "Copying $file_path to gs://${GCS_BUCKET}/$file_path"
+              gsutil cp "$file_path" "gs://${GCS_BUCKET}/$file_path"
+            fi
+          done <<< "${{ steps.execute.outputs.processed_files_for_copy }}"
+
+          echo "GCS copy step completed." 
