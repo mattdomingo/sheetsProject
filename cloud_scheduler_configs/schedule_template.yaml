@@ -10,10 +10,10 @@ schedule: '0 0 * * *'
 
 # Target HTTP URL that Cloud Scheduler will invoke for ALL scheduled jobs.
 # This service needs to handle POST requests with {"sql_gcs_path": "..."} in the body.
-target_url: https://bq-sync-service-950829835449.us-central1.run.app
+target_url: https://bq-sync-service-950829835449.us-central1.run.app/sync
 
 # Timezone for the schedule.
-time_zone: 'UTC'
+time_zone: 'America/Chicago' # Using IANA timezone for CDT
 
 # Description template for the Cloud Scheduler job.
 # The workflow will replace {SQL_FILENAME} with the actual SQL file name.

@@ -140,10 +140,12 @@ jobs:
             # Create description from template
             description=$(echo "$desc_template" | sed "s/{SQL_FILENAME}/$sql_filename/g")
 
-            # Construct the message body (JSON containing the GCS path)
-            message_body=$(jq -n --arg path "$sql_gcs_path" '{sql_gcs_path: $path}')
+            # Construct the message body (JSON containing table name and recreate flag)
+            table_name_only=$(echo "$sql_filename" | sed 's/\.sql$//g')
+            message_body=$(jq -n --arg name "$table_name_only" '{\"table_name\": $name, \"recreate_tables\": false}')
 
             echo "Ensuring job '$job_name' exists and is up-to-date..."
+            echo "  Payload: $message_body"
 
             # Check if the job already exists
             if gcloud scheduler jobs describe "$job_name" --project="$PROJECT_ID" --location="$LOCATION_ID" > /dev/null 2>&1; then
