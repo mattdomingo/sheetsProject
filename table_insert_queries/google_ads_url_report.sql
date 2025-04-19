@@ -1,7 +1,7 @@
-TRUNCATE TABLE `sheets_base_schema.google_ads_ad_report`;
+TRUNCATE TABLE `sheets_base_schema.google_ads_url_report`;
 
 -- Insert data from the source table into the target table
-INSERT INTO `sheets_base_schema.google_ads_ad_report` (
+INSERT INTO `sheets_base_schema.google_ads_url_report` (
   `source_relation`,
   `date_day`,
   `account_id`,
@@ -11,15 +11,12 @@ INSERT INTO `sheets_base_schema.google_ads_ad_report` (
   `ad_group_id`,
   `ad_group_name`,
   `ad_id`,
-  `ad_status`,
-  `ad_type`,
-  --`headline_part_1`,
-  --`headline_part_2`,
-  --`headline_part_3`,
-  --`description`,
-  --`description_2`,
-  --`path_1`,
-  --`path_2`,
+  --`final_url`,
+  `utm_source`,
+  `utm_medium`,
+  `utm_campaign`,
+  `utm_content`,
+  `utm_term`,
   `impressions`,
   `clicks`,
   --`cost`,
@@ -43,20 +40,17 @@ SELECT
   `ad_group_id`,
   `ad_group_name`,
   `ad_id`,
-  `ad_status`,
-  `ad_type`,
-  --`headline_part_1`,
-  --`headline_part_2`,
-  --`headline_part_3`,
-  --`description`,
-  --`description_2`,
-  --`path_1`,
-  --`path_2`,
+  --`final_url`,
+  `utm_source`,
+  `utm_medium`,
+  `utm_campaign`,
+  `utm_content`,
+  `utm_term`,
   `impressions`,
   `clicks`,
   --`cost`,
   `conversions`,
-  `conversions_value` AS `conversion_value`,
+  `conversions_value`,
   `view_through_conversions`
   --`ctr`,
   --`cpc`,
@@ -65,4 +59,4 @@ SELECT
   --`cpa`,
   --`roas`
 FROM
-  `google_ads_google_ads.google_ads__ad_report`;
+  `google_ads_google_ads.google_ads__url_report`; 
