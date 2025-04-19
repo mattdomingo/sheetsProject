@@ -110,7 +110,17 @@ jobs:
 
             echo "Ensuring job '$job_name' exists and is up-to-date..."
 
-            gcloud scheduler jobs update http "$job_name" \
+            # Check if the job already exists
+            if gcloud scheduler jobs describe "$job_name" --project="$PROJECT_ID" --location="$LOCATION_ID" > /dev/null 2>&1; then
+              echo "  Job '$job_name' exists. Updating..."
+              COMMAND="update"
+            else
+              echo "  Job '$job_name' does not exist. Creating..."
+              COMMAND="create"
+            fi
+
+            # Use the determined command (create or update)
+            gcloud scheduler jobs "$COMMAND" http "$job_name" \
               --project="$PROJECT_ID" \
               --location="$LOCATION_ID" \
               --schedule="$schedule" \
