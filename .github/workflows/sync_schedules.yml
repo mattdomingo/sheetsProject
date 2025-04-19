@@ -57,7 +57,7 @@ jobs:
           GCS_BUCKET="testmain-tenant-dev-sql-storage" # Bucket where SQL files are copied
           JOB_PREFIX="sql-refresh-" # Prefix for Cloud Scheduler job names
           LOCATION_ID="us-central1" # CHANGE THIS if your scheduler jobs are in a different region
-          PROJECT_ID=$(gcloud config get-value project)
+          PROJECT_ID=anthem-snacks
 
           echo "--- Reading template settings from $TEMPLATE_FILE ---"
           if [[ ! -f "$TEMPLATE_FILE" ]]; then
