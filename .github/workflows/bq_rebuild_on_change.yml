@@ -5,8 +5,9 @@ on:
     branches:
       - main # Trigger on push/merge to main branch
     paths:
-      # Only trigger if relevant CREATE SQL files change
+      # Only trigger if relevant SQL files change
       - 'table_create_queries/**.sql'
+      - 'table_insert_queries/**.sql' # Also trigger on insert file changes/deletions
 
 permissions:
   contents: read # Required to checkout the code
@@ -48,23 +49,67 @@ jobs:
       - name: Install dependencies
         run: pip install google-cloud-bigquery
 
+      - name: Handle deleted files in GCS
+        # Always run this step after auth, even if later steps fail
+        run: |
+          GCS_BUCKET="testmain-tenant-dev-sql-storage" # Target bucket (same as copy step)
+          echo "Identifying deleted SQL files..."
+          # Look for deleted files in both directories
+          DELETED_FILES=$(git diff --name-only --diff-filter=D HEAD~1 HEAD -- 'table_create_queries/**.sql' 'table_insert_queries/**.sql' || true)
+
+          if [[ -z "$DELETED_FILES" ]]; then
+            echo "No deleted *.sql files found in monitored directories. Skipping GCS removal."
+            exit 0
+          fi
+
+          echo "Found deleted files to remove from GCS:"
+          echo "$DELETED_FILES"
+          echo "-------------------------------------\"
+
+          while IFS= read -r file_path; do
+            if [[ -n "$file_path" ]]; then # Ensure the line is not empty
+              gcs_path="gs://${GCS_BUCKET}/${file_path}"
+              echo "Attempting to remove $gcs_path from GCS..."
+              # Use gsutil rm. Adding -f ensures it doesn't fail if the object is already gone.
+              if gsutil -q rm "$gcs_path"; then
+                echo "Successfully removed $gcs_path"
+              else
+                # Check if the file simply didn't exist, which is okay.
+                # gsutil stat returns non-zero for non-existent files.
+                if ! gsutil -q stat "$gcs_path"; then
+                   echo "Object $gcs_path did not exist in GCS. No action needed."
+                else
+                   echo "WARNING: Failed to remove $gcs_path. It might still exist."
+                   # Decide if this should be a hard failure (exit 1) or just a warning.
+                   # For now, just warn, as the primary goal is BQ execution.
+                fi
+              fi
+            fi
+          done <<< "$DELETED_FILES"
+
+          echo "GCS deletion step completed."
+
       - name: Identify and execute changed SQL pairs (Create then Insert)
         id: execute
         run: |
-          echo "Identifying changed SQL files in table_create_queries/ ..."
+          echo "Identifying changed CREATE SQL files..."
           CHANGED_CREATE_FILES=$(git diff --name-only --diff-filter=ACMRTUXB HEAD~1 HEAD -- 'table_create_queries/**.sql' || true)
+          echo "Identifying changed INSERT SQL files..."
+          CHANGED_INSERT_FILES=$(git diff --name-only --diff-filter=ACMRTUXB HEAD~1 HEAD -- 'table_insert_queries/**.sql' || true)
 
-          if [[ -z "$CHANGED_CREATE_FILES" ]]; then
-            echo "No changed *.sql files found in table_create_queries/. Skipping."
+          if [[ -z "$CHANGED_CREATE_FILES" && -z "$CHANGED_INSERT_FILES" ]]; then
+            echo "No changed *.sql files found in monitored directories. Skipping execution."
             echo "status=skipped" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          echo "Found changed create files to process:"
-          echo "$CHANGED_CREATE_FILES"
+          echo "Changed CREATE files:"
+          echo "${CHANGED_CREATE_FILES:-<none>}"
+          echo "Changed INSERT files:"
+          echo "${CHANGED_INSERT_FILES:-<none>}"
           echo "-------------------------------------"
 
-          # Define the inline Python executor script (same as the other workflow)
+          # Define the inline Python executor script
           PYTHON_EXEC_SCRIPT=$(cat << 'EOF'
           import sys, os, logging
           from google.cloud import bigquery
@@ -96,77 +141,118 @@ jobs:
               if not sql_files_to_execute:
                   logging.warning("No SQL files provided to execute script.")
                   sys.exit(0)
+              # Assuming auth setup provides ADC
               bq_client = bigquery.Client()
               logging.info(f"Using BigQuery Client with project: {bq_client.project}")
               all_successful = True
               for file_path in sql_files_to_execute:
                   logging.info(f"--- Processing file: {file_path} ---")
                   try:
+                      # Check if file exists before trying to open
+                      if not os.path.exists(file_path):
+                          logging.error(f"File not found: {file_path}")
+                          all_successful = False
+                          continue # Skip to next file
                       with open(file_path, 'r') as f: content = f.read()
                       if not execute_sql(bq_client, content, file_path): all_successful = False
-                  except FileNotFoundError:
-                      logging.error(f"File not found: {file_path}")
-                      all_successful = False
                   except Exception as e:
                       logging.error(f"Failed to read or process file {file_path}: {e}")
                       all_successful = False
               if not all_successful: sys.exit(1) # Fail the step
-              logging.info("SQL file executed successfully.")
+              logging.info("Python script finished processing provided SQL files.")
               sys.exit(0) # Succeed the step
           EOF
           )
 
           OVERALL_SUCCESS=true
-          FILES_TO_COPY="" # Store paths of files successfully processed in pairs
+          declare -A PROCESSED_INSERTS # Associative array to track processed inserts
+          FILES_TO_COPY="" # Store paths of ALL files successfully processed for GCS
 
-          # Loop through changed CREATE files
-          while IFS= read -r create_file; do
-            if [[ -z "$create_file" ]]; then continue; fi
-            echo "" # Add spacing
-            echo "--- Processing pair starting with: $create_file ---"
+          # 1. Process CREATE file changes (and their corresponding INSERTs)
+          if [[ -n "$CHANGED_CREATE_FILES" ]]; then
+            echo "--- Processing CREATE changes ---"
+            while IFS= read -r create_file; do
+              if [[ -z "$create_file" ]]; then continue; fi
+              echo "" # Add spacing
+              echo "--- Processing pair starting with CREATE file: $create_file ---"
 
-            table_name=$(basename "$create_file" .sql)
-            insert_file="table_insert_queries/${table_name}.sql"
+              table_name=$(basename "$create_file" .sql)
+              insert_file="table_insert_queries/${table_name}.sql"
 
-            if [[ ! -f "$insert_file" ]]; then
-              echo "ERROR: Corresponding insert file '$insert_file' not found for '$create_file'. Skipping pair."
-              OVERALL_SUCCESS=false # Mark failure but continue checking other files
-              continue
-            fi
+              CREATE_SUCCESS=false
+              INSERT_SUCCESS=false # Assume insert might not run or might fail
 
-            PAIR_SUCCESS=true
-            # Execute CREATE file
-            echo "Executing CREATE file: $create_file"
-            # Use process substitution to pass file path to python script
-            if ! echo "$create_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
-              echo "ERROR: Failed to execute $create_file."
-              PAIR_SUCCESS=false
-              OVERALL_SUCCESS=false
-            fi
-
-            # Execute INSERT file only if CREATE was successful for this pair
-            if [[ "$PAIR_SUCCESS" == "true" ]]; then
-              echo "Executing INSERT file: $insert_file"
-              if ! echo "$insert_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
-                echo "ERROR: Failed to execute $insert_file."
-                PAIR_SUCCESS=false # Mark pair as failed
+              # Execute CREATE file
+              echo "Executing CREATE file: $create_file"
+              if echo "$create_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
+                echo "Successfully executed $create_file."
+                CREATE_SUCCESS=true
+                FILES_TO_COPY+="$create_file"$'\n' # Add create file to copy list on success
+              else
+                echo "ERROR: Failed to execute $create_file."
                 OVERALL_SUCCESS=false
+                # Continue to next create file, do not attempt insert for this pair
+                continue
               fi
-            fi
 
-            # If both parts of the pair executed successfully, add them to the copy list
-            if [[ "$PAIR_SUCCESS" == "true" ]]; then
-              echo "Successfully processed pair: $create_file and $insert_file"
-              FILES_TO_COPY+="$create_file"$'\n'
-              FILES_TO_COPY+="$insert_file"$'\n'
-            fi
+              # If CREATE succeeded, execute corresponding INSERT file if it exists
+              if [[ "$CREATE_SUCCESS" == "true" ]]; then
+                if [[ -f "$insert_file" ]]; then
+                  echo "Executing corresponding INSERT file: $insert_file"
+                  if echo "$insert_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
+                    echo "Successfully executed $insert_file."
+                    INSERT_SUCCESS=true
+                    FILES_TO_COPY+="$insert_file"$'\n' # Add insert file to copy list on success
+                    PROCESSED_INSERTS["$insert_file"]=1 # Mark insert as processed
+                  else
+                    echo "ERROR: Failed to execute $insert_file after successful CREATE. Rebuild incomplete."
+                    OVERALL_SUCCESS=false
+                    # Continue to next create file, pair failed
+                    continue
+                  fi
+                else
+                  echo "INFO: No corresponding insert file '$insert_file' found for '$create_file'. Only CREATE was executed."
+                  # This is not necessarily an error, maybe the table has no initial data.
+                fi
+              fi
 
-          done <<< "$CHANGED_CREATE_FILES"
+            done <<< "$CHANGED_CREATE_FILES"
+          fi
+
+          # 2. Process remaining INSERT file changes (those not processed as part of a pair)
+          if [[ -n "$CHANGED_INSERT_FILES" ]]; then
+            echo "--- Processing standalone/remaining INSERT changes ---"
+            while IFS= read -r insert_file; do
+              if [[ -z "$insert_file" ]]; then continue; fi
+
+              # Check if this insert was already processed as part of a CREATE pair
+              if [[ -v PROCESSED_INSERTS["$insert_file"] ]]; then
+                echo "Skipping already processed INSERT file: $insert_file"
+                continue
+              fi
+
+              echo "" # Add spacing
+              echo "--- Processing standalone INSERT file: $insert_file ---"
+
+              # Execute INSERT file
+              if echo "$insert_file" | xargs -r python -c "$PYTHON_EXEC_SCRIPT"; then
+                 echo "Successfully executed $insert_file."
+                 FILES_TO_COPY+="$insert_file"$'\n' # Add to copy list on success
+                 PROCESSED_INSERTS["$insert_file"]=1 # Mark as processed (though likely redundant here)
+              else
+                 echo "ERROR: Failed to execute standalone $insert_file."
+                 OVERALL_SUCCESS=false
+                 # Continue processing other insert files even if one fails
+              fi
+
+            done <<< "$CHANGED_INSERT_FILES"
+          fi
+
 
           # Check overall success and output files for copying
           if [[ "$OVERALL_SUCCESS" == "true" ]]; then
             echo "-------------------------------------"
-            echo "All changed SQL pairs executed successfully."
+            echo "All relevant SQL files executed successfully."
             echo "processed_files_for_copy<<EOF" >> $GITHUB_OUTPUT
             echo -n "$FILES_TO_COPY" >> $GITHUB_OUTPUT # Use -n to avoid extra newline
             echo "EOF" >> $GITHUB_OUTPUT
@@ -175,17 +261,25 @@ jobs:
           else
             echo "-------------------------------------"
             echo "One or more SQL execution steps failed."
+            echo "processed_files_for_copy<<EOF" >> $GITHUB_OUTPUT # Still output successfully processed files
+            echo -n "$FILES_TO_COPY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "status=failed" >> $GITHUB_OUTPUT
-            # Do not output files for copying if any step failed
-            exit 1
+            exit 1 # Fail the job
           fi
 
       - name: Copy processed files to GCS
-        # Run only if the previous step succeeded overall
-        if: success() && steps.execute.outputs.status == 'executed'
+        # Run always to copy any files that succeeded, even if the overall job failed
+        # But only run if the execute step wasn't skipped entirely
+        if: steps.execute.outputs.status != 'skipped'
         run: |
           GCS_BUCKET="testmain-tenant-dev-sql-storage" # Target bucket
-          echo "Copying successfully processed files to gs://${GCS_BUCKET}/ ..."
+          echo "Copying successfully processed files (even if some steps failed) to gs://${GCS_BUCKET}/ ..."
+          # Ensure the output exists before trying to read it
+          if [[ -z "${{ steps.execute.outputs.processed_files_for_copy }}" ]]; then
+            echo "No files were successfully processed or marked for copying."
+            exit 0
+          fi
           echo "Files to copy:"
           echo "${{ steps.execute.outputs.processed_files_for_copy }}"
           echo "-------------------------------------"

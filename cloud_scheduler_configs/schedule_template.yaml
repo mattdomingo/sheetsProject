@@ -1,0 +1,26 @@
+# Default configuration template for scheduling SQL file execution.
+# This template is applied to all .sql files in table_insert_queries/
+# unless a specific override file exists for that SQL file (future enhancement).
+
+# --- Template Settings ---
+
+# Default Cloud Scheduler cron schedule string.
+# Example: Every day at midnight.
+schedule: '0 0 * * *'
+
+# Target HTTP URL that Cloud Scheduler will invoke for ALL scheduled jobs.
+# This service needs to handle POST requests with {"sql_gcs_path": "..."} in the body.
+target_url: https://bq-sync-service-950829835449.us-central1.run.app
+
+# Timezone for the schedule.
+time_zone: 'UTC'
+
+# Description template for the Cloud Scheduler job.
+# The workflow will replace {SQL_FILENAME} with the actual SQL file name.
+description_template: 'Daily refresh for {SQL_FILENAME} based on schedule_template.yaml'
+
+# HTTP method for the target URL.
+http_method: POST
+
+# Optional: Default attempt deadline for scheduler jobs.
+attempt_deadline: 15m 
