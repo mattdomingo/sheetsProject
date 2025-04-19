@@ -108,14 +108,14 @@ jobs:
           echo "\n--- Finding current SQL files in $SQL_DIR/ ---"
           declare -A current_sql_files
           # Use find to handle filenames with spaces, etc., correctly
-          # Populate the array outside the processing loops
-          find "$SQL_DIR" -maxdepth 1 -name '*.sql' -print0 | while IFS= read -r -d $'\0' sql_file_path; do
+          # Populate the array using Process Substitution to avoid subshell issues
+          while IFS= read -r -d $'\0' sql_file_path; do
             sql_filename=$(basename "$sql_file_path")
             if [[ -n "$sql_filename" ]]; then
               echo "Found: $sql_filename"
               current_sql_files["$sql_filename"]=1 # Mark file as present
             fi
-          done
+          done < <(find "$SQL_DIR" -maxdepth 1 -name '*.sql' -print0)
           echo "Found ${#current_sql_files[@]} SQL files."
 
           # Exit if no SQL files found to prevent accidental deletion of all jobs
