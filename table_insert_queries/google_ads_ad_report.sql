@@ -1,3 +1,4 @@
+-- Clear the target table before inserting new data
 TRUNCATE TABLE `sheets_base_schema.google_ads_ad_report`;
 
 -- Insert data from the source table into the target table
@@ -22,9 +23,10 @@ INSERT INTO `sheets_base_schema.google_ads_ad_report` (
   --`path_2`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
-  `conversion_value`,
+  `conversions_value`,
   `view_through_conversions`
   --`ctr`,
   --`cpc`,
@@ -54,9 +56,10 @@ SELECT
   --`path_2`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
-  `conversions_value` AS `conversion_value`,
+  `conversions_value`,
   `view_through_conversions`
   --`ctr`,
   --`cpc`,

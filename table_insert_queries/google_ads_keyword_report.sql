@@ -1,7 +1,3 @@
--- ----------------------------------------------------------------------------
--- Script to load data from source to target Google Ads Keyword Report table
--- ----------------------------------------------------------------------------
-
 -- Clear the target table before inserting new data
 TRUNCATE TABLE `sheets_base_schema.google_ads_keyword_report`;
 
@@ -25,6 +21,7 @@ INSERT INTO `sheets_base_schema.google_ads_keyword_report` (
   --`search_ad_relevance`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
   `conversions_value`,
@@ -55,9 +52,10 @@ SELECT
   --`search_ad_relevance`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
-  `conversion_value`,
+  `conversions_value`,
   `view_through_conversions`
   --`ctr`,
   --`cpc`,

@@ -1,6 +1,5 @@
 -- Google Ads Account Report table creation query
 -- Contains daily performance metrics at the account level
---NEEDS SPEND (float)
 CREATE OR REPLACE TABLE `sheets_base_schema.google_ads_account_report` (
   `source_relation` STRING OPTIONS(description = 'The source of the record if unioning functionality is being used'),
   `date_day` DATE OPTIONS(description = 'The date of the record'),
@@ -10,6 +9,7 @@ CREATE OR REPLACE TABLE `sheets_base_schema.google_ads_account_report` (
   `currency_code` STRING OPTIONS(description = 'The currency used for the account'),
   `impressions` INTEGER OPTIONS(description = 'Count of ad impressions'),
   `clicks` INTEGER OPTIONS(description = 'Count of ad clicks'),
+  `spend` FLOAT64 OPTIONS(description = 'Spend amount in account currency'),
   `cost` NUMERIC OPTIONS(description = 'Cost of the ads in account currency'),
   `conversions` FLOAT64 OPTIONS(description = 'Count of conversions'),
   `conversion_value` FLOAT64 OPTIONS(description = 'Value of conversions'),
