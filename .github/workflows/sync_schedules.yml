@@ -142,7 +142,8 @@ jobs:
 
             # Construct the message body (JSON containing table name and recreate flag)
             table_name_only=$(echo "$sql_filename" | sed 's/\.sql$//g')
-            message_body=$(jq -n --arg name "$table_name_only" '{\"table_name\": $name, \"recreate_tables\": false}')
+            # Use jq object construction syntax
+            message_body=$(jq -n --arg name "$table_name_only" '{table_name: $name, recreate_tables: false}')
 
             echo "Ensuring job '$job_name' exists and is up-to-date..."
             echo "  Payload: $message_body"
