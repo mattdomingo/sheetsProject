@@ -1,7 +1,3 @@
--- ----------------------------------------------------------------------------
--- Script to load data from source to target Google Ads Ad Group Report table
--- ----------------------------------------------------------------------------
-
 -- Clear the target table before inserting new data
 TRUNCATE TABLE `sheets_base_schema.google_ads_ad_group_report`;
 
@@ -20,9 +16,10 @@ INSERT INTO `sheets_base_schema.google_ads_ad_group_report` (
   `ad_group_type`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
-  `conversion_value`,
+  `conversions_value`,
   `view_through_conversions`
   --`ctr`,
   --`cpc`,
@@ -45,6 +42,7 @@ SELECT
   `ad_group_type`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
   `conversions_value`,

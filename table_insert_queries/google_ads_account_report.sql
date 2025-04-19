@@ -1,7 +1,3 @@
--- ----------------------------------------------------------------------------
--- Script to load data from source to target Google Ads Account Report table
--- ----------------------------------------------------------------------------
-
 -- Clear the target table before inserting new data
 TRUNCATE TABLE `sheets_base_schema.google_ads_account_report`;
 
@@ -15,6 +11,7 @@ INSERT INTO `sheets_base_schema.google_ads_account_report` (
   `currency_code`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
   `conversion_value`,
@@ -35,6 +32,7 @@ SELECT
   `currency_code`,
   `impressions`,
   `clicks`,
+  `spend`,
   --`cost`,
   `conversions`,
   `conversions_value`,
