@@ -35,7 +35,7 @@ jobs:
           # workload_identity_provider: 'projects/<YOUR_PROJECT_NUMBER>/locations/global/workloadIdentityPools/<YOUR_POOL_ID>/providers/<YOUR_PROVIDER_ID>'
           # service_account: 'your-bq-gcs-service-account@your-gcp-project-id.iam.gserviceaccount.com' # Needs BQ and GCS permissions
           # Option 2: Service Account Key JSON (Using your secret)
-          credentials_json: '${{ secrets.SA_DEPLOYMENT }}' # Ensure this SA has BQ and GCS permissions
+          credentials_json: '${{ secrets.DEPLOYMENT_SA }}' # Ensure this SA has BQ and GCS permissions
 
       - name: Set up gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
