@@ -167,7 +167,7 @@ jobs:
               --http-method="$http_method" \
               --message-body="$message_body" \
               --description="$description" \
-              --headers="Content-Type=application/json" \
+              --update-headers="Content-Type=application/json" \
               ${attempt_deadline:+--attempt-deadline="$attempt_deadline"} # Add deadline only if set in template
 
             if [[ $? -ne 0 ]]; then
