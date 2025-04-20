@@ -168,6 +168,7 @@ jobs:
               --message-body="$message_body" \
               --description="$description" \
               ${attempt_deadline:+--attempt-deadline="$attempt_deadline"} # Add deadline only if set in template
+              --headers="Content-Type=application/json" # Set the Content-Type header
 
             if [[ $? -ne 0 ]]; then
               echo "ERROR: Failed to create/update job $job_name for SQL file $sql_filename. Failing workflow." >&2
