@@ -1,8 +1,8 @@
 -- Clear the target table before inserting new data
-TRUNCATE TABLE `sheets_base_schema.google_ads_ad_report`;
+TRUNCATE TABLE `sheets_base_schema.google_ads_keyword_report`;
 
 -- Insert data from the source table into the target table
-INSERT INTO `sheets_base_schema.google_ads_ad_report` (
+INSERT INTO `sheets_base_schema.google_ads_keyword_report` (
   `source_relation`,
   `date_day`,
   `account_id`,
@@ -11,16 +11,14 @@ INSERT INTO `sheets_base_schema.google_ads_ad_report` (
   `campaign_name`,
   `ad_group_id`,
   `ad_group_name`,
-  `ad_id`,
-  `ad_status`,
-  `ad_type`,
-  --`headline_part_1`,
-  --`headline_part_2`,
-  --`headline_part_3`,
-  --`description`,
-  --`description_2`,
-  --`path_1`,
-  --`path_2`,
+  `criterion_id`,
+  `keyword_match_type`,
+  `keyword_text`,
+  --`keyword_status`,
+  --`quality_score`,
+  --`search_predicted_ctr`,
+  --`search_landing_page_experience`,
+  --`search_ad_relevance`,
   `impressions`,
   `clicks`,
   `spend`,
@@ -44,16 +42,14 @@ SELECT
   `campaign_name`,
   `ad_group_id`,
   `ad_group_name`,
-  `ad_id`,
-  `ad_status`,
-  `ad_type`,
-  --`headline_part_1`,
-  --`headline_part_2`,
-  --`headline_part_3`,
-  --`description`,
-  --`description_2`,
-  --`path_1`,
-  --`path_2`,
+  `criterion_id`,
+  `keyword_match_type`,
+  `keyword_text`,
+  --`keyword_status`,
+  --`quality_score`,
+  --`search_predicted_ctr`,
+  --`search_landing_page_experience`,
+  --`search_ad_relevance`,
   `impressions`,
   `clicks`,
   `spend`,
@@ -68,4 +64,4 @@ SELECT
   --`cpa`,
   --`roas`
 FROM
-  `google_ads_google_ads.google_ads__ad_report`;
+  `google_ads_google_ads.google_ads__keyword_report`; 

@@ -1,6 +1,6 @@
--- Google Ads Ad Report table creation query
--- Contains daily performance metrics at the ad level
-CREATE OR REPLACE TABLE `sheets_base_schema.google_ads_ad_report` (
+-- Google Ads Keyword Report table creation query
+-- Contains daily performance metrics at the keyword level
+CREATE OR REPLACE TABLE `sheets_base_schema.google_ads_keyword_report` (
   `source_relation` STRING OPTIONS(description = 'The source of the record if unioning functionality is being used'),
   `date_day` DATE OPTIONS(description = 'The date of the record'),
   `account_id` INT64 OPTIONS(description = 'The Google Ads account ID'),
@@ -9,16 +9,14 @@ CREATE OR REPLACE TABLE `sheets_base_schema.google_ads_ad_report` (
   `campaign_name` STRING OPTIONS(description = 'The name of the campaign'),
   `ad_group_id` STRING OPTIONS(description = 'The ID of the ad group'),
   `ad_group_name` STRING OPTIONS(description = 'The name of the ad group'),
-  `ad_id` INT64 OPTIONS(description = 'The ID of the ad'),
-  `ad_status` STRING OPTIONS(description = 'The status of the ad (enabled, paused, removed)'),
-  `ad_type` STRING OPTIONS(description = 'The type of the ad (text, responsive search, etc.)'),
-  `headline_part_1` STRING OPTIONS(description = 'First headline of the ad'),
-  `headline_part_2` STRING OPTIONS(description = 'Second headline of the ad'),
-  `headline_part_3` STRING OPTIONS(description = 'Third headline of the ad'),
-  `description` STRING OPTIONS(description = 'Description of the ad'),
-  `description_2` STRING OPTIONS(description = 'Second description of the ad'),
-  `path_1` STRING OPTIONS(description = 'First part of the display URL path'),
-  `path_2` STRING OPTIONS(description = 'Second part of the display URL path'),
+  `criterion_id` INT64 OPTIONS(description = 'The ID of the keyword criterion'),
+  `keyword_match_type` STRING OPTIONS(description = 'The match type of the keyword (exact, phrase, broad)'),
+  `keyword_text` STRING OPTIONS(description = 'The text of the keyword'),
+  `keyword_status` STRING OPTIONS(description = 'The status of the keyword (enabled, paused, removed)'),
+  `quality_score` INTEGER OPTIONS(description = 'The quality score of the keyword (1-10)'),
+  `search_predicted_ctr` STRING OPTIONS(description = 'Predicted CTR of the keyword (above average, average, below average)'),
+  `search_landing_page_experience` STRING OPTIONS(description = 'Quality of landing page experience (above average, average, below average)'),
+  `search_ad_relevance` STRING OPTIONS(description = 'Relevance of ad to search (above average, average, below average)'),
   `impressions` INTEGER OPTIONS(description = 'Count of ad impressions'),
   `clicks` INTEGER OPTIONS(description = 'Count of ad clicks'),
   `spend` FLOAT64 OPTIONS(description = 'Spend amount in account currency'),
@@ -33,4 +31,4 @@ CREATE OR REPLACE TABLE `sheets_base_schema.google_ads_ad_report` (
   `cpa` NUMERIC OPTIONS(description = 'Cost per acquisition (cost/conversions)'),
   `roas` NUMERIC OPTIONS(description = 'Return on ad spend (conversion_value/cost)')
 )
-OPTIONS (description = 'Daily performance metrics at the Google Ads ad level');
+OPTIONS (description = 'Daily performance metrics at the Google Ads keyword level'); 

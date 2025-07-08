@@ -1,5 +1,5 @@
 -- Creates the target table for Shopify products with a limited set of columns
-CREATE TABLE `sheets_base_schema.shopify_products` (
+CREATE OR REPLACE TABLE `sheets_base_schema.shopify_products` (
   `product_id` INT64 OPTIONS(description = 'An unsigned 64-bit integer that\'s used as a unique identifier for the product. Each id is unique across the Shopify system. No two products will have the same id, even if they\'re from different shops.'),
   `handle` STRING OPTIONS(description = 'A unique human-friendly string for the product. Automatically generated from the product\'s title.'),
   `product_type` STRING OPTIONS(description = 'A categorization for the product used for filtering and searching products.'),

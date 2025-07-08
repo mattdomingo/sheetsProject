@@ -1,26 +1,23 @@
 -- Clear the target table before inserting new data
-TRUNCATE TABLE `sheets_base_schema.google_ads_ad_report`;
+TRUNCATE TABLE `sheets_base_schema.google_ads_campaign_report`;
 
 -- Insert data from the source table into the target table
-INSERT INTO `sheets_base_schema.google_ads_ad_report` (
+INSERT INTO `sheets_base_schema.google_ads_campaign_report` (
   `source_relation`,
   `date_day`,
   `account_id`,
   `account_name`,
   `campaign_id`,
   `campaign_name`,
-  `ad_group_id`,
-  `ad_group_name`,
-  `ad_id`,
-  `ad_status`,
-  `ad_type`,
-  --`headline_part_1`,
-  --`headline_part_2`,
-  --`headline_part_3`,
-  --`description`,
-  --`description_2`,
-  --`path_1`,
-  --`path_2`,
+  --`campaign_status`,
+  `advertising_channel_type`,
+  `advertising_channel_subtype`,
+  --`campaign_start_date`,
+  --`campaign_end_date`,
+  --`budget_id`,
+  --`budget_name`,
+  --`budget_amount`,
+  --`budget_type`,
   `impressions`,
   `clicks`,
   `spend`,
@@ -42,18 +39,15 @@ SELECT
   `account_name`,
   `campaign_id`,
   `campaign_name`,
-  `ad_group_id`,
-  `ad_group_name`,
-  `ad_id`,
-  `ad_status`,
-  `ad_type`,
-  --`headline_part_1`,
-  --`headline_part_2`,
-  --`headline_part_3`,
-  --`description`,
-  --`description_2`,
-  --`path_1`,
-  --`path_2`,
+  --`campaign_status`,
+  `advertising_channel_type`,
+  `advertising_channel_subtype`,
+  --`campaign_start_date`,
+  --`campaign_end_date`,
+  --`budget_id`,
+  --`budget_name`,
+  --`budget_amount`,
+  --`budget_type`,
   `impressions`,
   `clicks`,
   `spend`,
@@ -68,4 +62,4 @@ SELECT
   --`cpa`,
   --`roas`
 FROM
-  `google_ads_google_ads.google_ads__ad_report`;
+  `google_ads_google_ads.google_ads__campaign_report`;

@@ -1,0 +1,34 @@
+-- Pinterest Ads URL Report table creation query
+-- Contains daily performance metrics at the URL level
+CREATE OR REPLACE TABLE `sheets_base_schema.pinterest_ads__url_report` (
+  `source_relation` STRING OPTIONS(description = 'The source of the record if the unioning functionality is being used. If not this field will be empty.'),
+  `date_day` DATE OPTIONS(description = 'The performance date of the record.'),
+  `advertiser_id` STRING OPTIONS(description = 'The ID of the related Advertiser.'),
+  `advertiser_name` STRING OPTIONS(description = 'Name of the advertiser.'),
+  `campaign_id` STRING OPTIONS(description = 'The ID of the related Campaign.'),
+  `campaign_name` STRING OPTIONS(description = 'The name of the related Campaign.'),
+  `campaign_status` STRING OPTIONS(description = 'Status of the campaign.'),
+  `ad_group_id` STRING OPTIONS(description = 'The ID of the related Ad group.'),
+  `ad_group_name` STRING OPTIONS(description = 'The name of the related Ad group.'),
+  `ad_group_status` STRING OPTIONS(description = 'Status of the ad group.'),
+  `destination_url` STRING OPTIONS(description = 'Pin destination URL.'),
+  `creative_type` STRING OPTIONS(description = 'The creative type. One of "APP", "APP_VIDEO", "BOARD", "CAROUSEL", "CINEMATIC", "COMMERCE", "MAX_VIDEO", "NATIVE_VIDEO", "REGULAR", "SEARCH_PROMINENCE", "SEARCH_PROMINENCE_CAROUSEL", "SHOPPING", "SHOP_THE_PIN", "THIRD_PARTY", or "VIDEO".'),
+  `pin_promotion_id` STRING OPTIONS(description = 'The ID of the related Pin promotion.'),
+  `pin_name` STRING OPTIONS(description = 'Pin promotion name.'),
+  `pin_status` STRING OPTIONS(description = 'The status of the Pin promotion. One of "ACTIVE", "ARCHIVED", "PAUSED".'),
+  `base_url` STRING OPTIONS(description = 'The base URL of the ad, extracted from the `destination_url`.'),
+  `url_host` STRING OPTIONS(description = 'The URL host of the ad, extracted from the `destination_url`.'),
+  `url_path` STRING OPTIONS(description = 'The URL path of the ad, extracted from the `destination_url`.'),
+  `utm_source` STRING OPTIONS(description = 'The utm_source parameter of the ad, extracted from the `destination_url`.'),
+  `utm_medium` STRING OPTIONS(description = 'The utm_medium parameter of the ad, extracted from the `destination_url`.'),
+  `utm_campaign` STRING OPTIONS(description = 'The utm_campaign parameter of the ad, extracted from the `destination_url`.'),
+  `utm_content` STRING OPTIONS(description = 'The utm_content parameter of the ad, extracted from the `destination_url`.'),
+  `utm_term` STRING OPTIONS(description = 'The utm_term parameter of the ad, extracted from the `destination_url`.'),
+  `spend` FLOAT64 OPTIONS(description = 'The amount of spend that occurred on the day of the record.'),
+  `clicks` INT64 OPTIONS(description = 'The number of paid and earned clicks that occurred on the day of the record.'),
+  `impressions` INT64 OPTIONS(description = 'The number of paid and earned impressions that occurred on the day of the record.'),
+  `total_conversions` INT64 OPTIONS(description = 'This is the sum of all website conversions, otherwise known as the number of conversion events. For example, if you track sign-ups and checkouts on your website, it's the sum of all sign-ups and checkouts attributed from clicks, engagements, and views on Pinterest. Example: If a user clicks on a Pinterest ad and completes two different conversion actions (e.g., signs up and checks out), this would be counted as 2 total conversions.'),
+  `total_conversions_quantity` INT64 OPTIONS(description = 'Refers to the total count of items or units involved in the conversions. This metric is often more granular and relates to the specific quantity of products or services purchased or actions taken. Example: If a single checkout includes three items, the total_conversions_quantity would be 3, even though it counts as one total_conversion.'),
+  `total_conversions_value` FLOAT64 OPTIONS(description = 'Total conversions order value. The total value of the conversions, calculated by summing up the revenue or order values attributed to conversions. Converted from the source `total_conversions_value_in_micro_dollar` field.')
+)
+OPTIONS (description = 'Daily performance metrics at the Pinterest Ads URL level'); 
