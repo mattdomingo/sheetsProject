@@ -1,5 +1,7 @@
 # Data Pipeline for Google Sheets Integration
 
+Built @ Pharus
+
 This project contains a set of SQL scripts and configuration files designed to create and populate tables in a Google BigQuery. The data is sourced from various platforms like Facebook Ads, Google Ads, Shopify, and QuickBooks Online (QBO).
 
 ## Project Structure
